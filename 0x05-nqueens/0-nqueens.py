@@ -1,68 +1,58 @@
 #!/usr/bin/python3
-"""N Queens"""
+"""
+N queens: The N Queens puzzle is the challenge of placing
+N non-attacking queens on an N×N chessboard.
+"""
 import sys
 
 
-def format_requirements(board):
-    """Prints according to requirements"""
-    ret = []
-    for i in range(len(board)):
-        colIdx = board[i].index(1)
-        ret.append([i, colIdx])
-    print(ret)
-
-
-def is_valid_queen(board, curCol, row, n):
-    """Checks if element is a valid queen"""
-    # Check prev columns
-    for i in range(curCol):
-        if board[row][i] == 1:
-            return False
-    # Check for upper diagonal
-    i = row
-    j = curCol
-    while i >= 0 and j >= 0:
-        if board[i][j] == 1:
-            return False
-        i -= 1
-        j -= 1
-    # Check for lower diagonal
-    i = row
-    j = curCol
-    while i < n and j >= 0:
-        if board[i][j] == 1:
-            return False
-        i += 1
-        j -= 1
-    return True
-
-
-def nQueens(board, curCol, n):
-    """Recursive call that places queens in all the
-    posible positions of the board"""
-    stat = False
-    if curCol == n:
-        format_requirements(board)
-        return True
-    for row in range(0, n):
-        if is_valid_queen(board, curCol, row, n):
-            board[row][curCol] = 1
-            stat = nQueens(board, curCol + 1, n) or stat
-            board[row][curCol] = 0
-    return stat
-
-
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        exit(1)
-    if not sys.argv[1].isdigit():
-        print("N must be a number")
-        exit(1)
-    n = int(sys.argv[1])
+def solve_nqueens(n):
+    # Check if N is less than 4, which is not allowed for the N Queens problem
     if n < 4:
         print("N must be at least 4")
-        exit(1)
-    board = [[0 for i in range(n)] for j in range(n)]
-    # first col is 0
-    nQueens(board, 0, n)
+        sys.exit(1)
+
+    def is_safe(board, row, col):
+        # Check if a queen can be placed at position (row, col)
+        # without attacking any other queens
+        for i in range(row):
+            # Check if the current queen shares the same column
+            # or diagonal with any previously placed queens
+            if board[i] == col or \
+               board[i] - col == i - row or \
+               board[i] - col == row - i:
+                return False
+        return True
+
+    def place_queens(board, row):
+        if row == n:
+            # All queens have been successfully placed, print the solution
+            print([[i, board[i]] for i in range(n)])
+        else:
+            # Try placing a queen in each column of the current row
+            for col in range(n):
+                if is_safe(board, row, col):
+                    # Queen can be placed at (row, col), update
+                    # the board and move to the next row
+                    board[row] = col
+                    place_queens(board, row + 1)
+
+    # Initialize the board as a list of -1 (no queen placed yet)
+    board = [-1] * n
+    place_queens(board, 0)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        # Check if the number of command-line arguments is correct
+        print("Usage: nqueens N")
+        sys.exit(1)
+
+    try:
+        n = int(sys.argv[1])
+    except ValueError:
+        # Check if the provided N value is a valid integer
+        print("N must be a number")
+        sys.exit(1)
+
+    solve_nqueens(n)
