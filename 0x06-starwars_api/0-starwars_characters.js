@@ -1,6 +1,6 @@
 #!/usr/bin/node
 /**
- * 0x06. Star Wars API
+ * 0x0F. Star Wars API
  */
 const process = require("process");
 const request = require("request");
