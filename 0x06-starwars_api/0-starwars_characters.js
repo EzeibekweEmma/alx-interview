@@ -1,33 +1,29 @@
 #!/usr/bin/node
-/**
- * 0x0F. Star Wars API
- */
-const process = require("process");
-const request = require("request");
+// script that prints all characters of a Star Wars movie
 
-if (process.argv.length !== 3) {
-    process.exit(0);
-}
+const request = require('request');
 
-function requestCharacter(url) {
-    return new Promise((resolve, reject) => {
-        request(url, (error, response, body) => {
-            error ? reject(error.message) : resolve(JSON.parse(body));
-        });
-    });
-}
+// Get movie ID from command line arguments
+// as the first prositional argument
+const movieId = process.argv[2];
 
-function requestApi() {
-    const url = `https://swapi-api.hbtn.io/api/films/${process.argv[2]}`;
-    request(url, async (error, response, body) => {
-        error && new Error(error.message);
-        const { characters } = JSON.parse(body);
-        for (const index in characters) {
-            await requestCharacter(characters[index])
-                .then((res) => console.log(res.name))
-                .catch((err) => console.log(err.message));
+const url = `https://swapi-api.hbtn.io/api/films/${movieId}`;
+
+request(url, (error, response, body) => {
+  if (response.statusCode === 200 && !error) {
+    const movieData = JSON.parse(body);
+    const characters = movieData.characters;
+
+    characters.forEach((characterUrl, index) => {
+      request(characterUrl, (charError, charResponse, charBody) => {
+        if (charResponse.statusCode === 200 && !charError) {
+          const characterData = JSON.parse(charBody);
+          console.log(`${characterData.name}`);
+        } else {
+          console.error(`Error fetching data from: ${charError}`);
         }
+      });
     });
+  }
 }
-
-requestApi();
+);
